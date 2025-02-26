@@ -1,0 +1,77 @@
+;
+; 2_PrintProcessId.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=2_PrintProcessId.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+2_PrintProcessId_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+2_PrintProcessId.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%2_PrintProcessId.DeviceDesc%=2_PrintProcessId_Device, Root\2_PrintProcessId ; TODO: edit hw-id
+
+[2_PrintProcessId_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+2_PrintProcessId.sys
+
+;-------------- Service installation
+[2_PrintProcessId_Device.NT.Services]
+AddService = 2_PrintProcessId,%SPSVCINST_ASSOCSERVICE%, 2_PrintProcessId_Service_Inst
+
+; -------------- 2_PrintProcessId driver install sections
+[2_PrintProcessId_Service_Inst]
+DisplayName    = %2_PrintProcessId.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\2_PrintProcessId.sys
+
+;
+;--- 2_PrintProcessId_Device Coinstaller installation ------
+;
+
+[2_PrintProcessId_Device.NT.CoInstallers]
+AddReg=2_PrintProcessId_Device_CoInstaller_AddReg
+CopyFiles=2_PrintProcessId_Device_CoInstaller_CopyFiles
+
+[2_PrintProcessId_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[2_PrintProcessId_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[2_PrintProcessId_Device.NT.Wdf]
+KmdfService =  2_PrintProcessId, 2_PrintProcessId_wdfsect
+[2_PrintProcessId_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "2_PrintProcessId Installation Disk"
+2_PrintProcessId.DeviceDesc = "2_PrintProcessId Device"
+2_PrintProcessId.SVCDESC = "2_PrintProcessId Service"

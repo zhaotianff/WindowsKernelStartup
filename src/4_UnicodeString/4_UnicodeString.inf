@@ -1,0 +1,77 @@
+;
+; 4_UnicodeString.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=4_UnicodeString.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+4_UnicodeString_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+4_UnicodeString.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%4_UnicodeString.DeviceDesc%=4_UnicodeString_Device, Root\4_UnicodeString ; TODO: edit hw-id
+
+[4_UnicodeString_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+4_UnicodeString.sys
+
+;-------------- Service installation
+[4_UnicodeString_Device.NT.Services]
+AddService = 4_UnicodeString,%SPSVCINST_ASSOCSERVICE%, 4_UnicodeString_Service_Inst
+
+; -------------- 4_UnicodeString driver install sections
+[4_UnicodeString_Service_Inst]
+DisplayName    = %4_UnicodeString.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\4_UnicodeString.sys
+
+;
+;--- 4_UnicodeString_Device Coinstaller installation ------
+;
+
+[4_UnicodeString_Device.NT.CoInstallers]
+AddReg=4_UnicodeString_Device_CoInstaller_AddReg
+CopyFiles=4_UnicodeString_Device_CoInstaller_CopyFiles
+
+[4_UnicodeString_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[4_UnicodeString_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[4_UnicodeString_Device.NT.Wdf]
+KmdfService =  4_UnicodeString, 4_UnicodeString_wdfsect
+[4_UnicodeString_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "4_UnicodeString Installation Disk"
+4_UnicodeString.DeviceDesc = "4_UnicodeString Device"
+4_UnicodeString.SVCDESC = "4_UnicodeString Service"

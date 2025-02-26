@@ -1,0 +1,77 @@
+;
+; 6_UserLevelCommunication.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=6_UserLevelCommunication.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+6_UserLevelCommunication_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+6_UserLevelCommunication.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%6_UserLevelCommunication.DeviceDesc%=6_UserLevelCommunication_Device, Root\6_UserLevelCommunication ; TODO: edit hw-id
+
+[6_UserLevelCommunication_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+6_UserLevelCommunication.sys
+
+;-------------- Service installation
+[6_UserLevelCommunication_Device.NT.Services]
+AddService = 6_UserLevelCommunication,%SPSVCINST_ASSOCSERVICE%, 6_UserLevelCommunication_Service_Inst
+
+; -------------- 6_UserLevelCommunication driver install sections
+[6_UserLevelCommunication_Service_Inst]
+DisplayName    = %6_UserLevelCommunication.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\6_UserLevelCommunication.sys
+
+;
+;--- 6_UserLevelCommunication_Device Coinstaller installation ------
+;
+
+[6_UserLevelCommunication_Device.NT.CoInstallers]
+AddReg=6_UserLevelCommunication_Device_CoInstaller_AddReg
+CopyFiles=6_UserLevelCommunication_Device_CoInstaller_CopyFiles
+
+[6_UserLevelCommunication_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[6_UserLevelCommunication_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[6_UserLevelCommunication_Device.NT.Wdf]
+KmdfService =  6_UserLevelCommunication, 6_UserLevelCommunication_wdfsect
+[6_UserLevelCommunication_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "6_UserLevelCommunication Installation Disk"
+6_UserLevelCommunication.DeviceDesc = "6_UserLevelCommunication Device"
+6_UserLevelCommunication.SVCDESC = "6_UserLevelCommunication Service"

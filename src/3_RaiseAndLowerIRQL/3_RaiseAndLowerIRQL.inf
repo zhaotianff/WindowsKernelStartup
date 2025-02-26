@@ -1,0 +1,77 @@
+;
+; 3_RaiseAndLowerIRQL.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=3_RaiseAndLowerIRQL.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+3_RaiseAndLowerIRQL_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+3_RaiseAndLowerIRQL.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%3_RaiseAndLowerIRQL.DeviceDesc%=3_RaiseAndLowerIRQL_Device, Root\3_RaiseAndLowerIRQL ; TODO: edit hw-id
+
+[3_RaiseAndLowerIRQL_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+3_RaiseAndLowerIRQL.sys
+
+;-------------- Service installation
+[3_RaiseAndLowerIRQL_Device.NT.Services]
+AddService = 3_RaiseAndLowerIRQL,%SPSVCINST_ASSOCSERVICE%, 3_RaiseAndLowerIRQL_Service_Inst
+
+; -------------- 3_RaiseAndLowerIRQL driver install sections
+[3_RaiseAndLowerIRQL_Service_Inst]
+DisplayName    = %3_RaiseAndLowerIRQL.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\3_RaiseAndLowerIRQL.sys
+
+;
+;--- 3_RaiseAndLowerIRQL_Device Coinstaller installation ------
+;
+
+[3_RaiseAndLowerIRQL_Device.NT.CoInstallers]
+AddReg=3_RaiseAndLowerIRQL_Device_CoInstaller_AddReg
+CopyFiles=3_RaiseAndLowerIRQL_Device_CoInstaller_CopyFiles
+
+[3_RaiseAndLowerIRQL_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[3_RaiseAndLowerIRQL_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[3_RaiseAndLowerIRQL_Device.NT.Wdf]
+KmdfService =  3_RaiseAndLowerIRQL, 3_RaiseAndLowerIRQL_wdfsect
+[3_RaiseAndLowerIRQL_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "3_RaiseAndLowerIRQL Installation Disk"
+3_RaiseAndLowerIRQL.DeviceDesc = "3_RaiseAndLowerIRQL Device"
+3_RaiseAndLowerIRQL.SVCDESC = "3_RaiseAndLowerIRQL Service"

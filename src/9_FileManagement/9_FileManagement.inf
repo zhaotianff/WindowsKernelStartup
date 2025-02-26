@@ -1,0 +1,77 @@
+;
+; 9_FileManagement.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=9_FileManagement.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+9_FileManagement_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+9_FileManagement.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%9_FileManagement.DeviceDesc%=9_FileManagement_Device, Root\9_FileManagement ; TODO: edit hw-id
+
+[9_FileManagement_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+9_FileManagement.sys
+
+;-------------- Service installation
+[9_FileManagement_Device.NT.Services]
+AddService = 9_FileManagement,%SPSVCINST_ASSOCSERVICE%, 9_FileManagement_Service_Inst
+
+; -------------- 9_FileManagement driver install sections
+[9_FileManagement_Service_Inst]
+DisplayName    = %9_FileManagement.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\9_FileManagement.sys
+
+;
+;--- 9_FileManagement_Device Coinstaller installation ------
+;
+
+[9_FileManagement_Device.NT.CoInstallers]
+AddReg=9_FileManagement_Device_CoInstaller_AddReg
+CopyFiles=9_FileManagement_Device_CoInstaller_CopyFiles
+
+[9_FileManagement_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[9_FileManagement_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[9_FileManagement_Device.NT.Wdf]
+KmdfService =  9_FileManagement, 9_FileManagement_wdfsect
+[9_FileManagement_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "9_FileManagement Installation Disk"
+9_FileManagement.DeviceDesc = "9_FileManagement Device"
+9_FileManagement.SVCDESC = "9_FileManagement Service"

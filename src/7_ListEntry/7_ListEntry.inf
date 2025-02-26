@@ -1,0 +1,77 @@
+;
+; 7_ListEntry.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=7_ListEntry.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+7_ListEntry_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+7_ListEntry.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%7_ListEntry.DeviceDesc%=7_ListEntry_Device, Root\7_ListEntry ; TODO: edit hw-id
+
+[7_ListEntry_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+7_ListEntry.sys
+
+;-------------- Service installation
+[7_ListEntry_Device.NT.Services]
+AddService = 7_ListEntry,%SPSVCINST_ASSOCSERVICE%, 7_ListEntry_Service_Inst
+
+; -------------- 7_ListEntry driver install sections
+[7_ListEntry_Service_Inst]
+DisplayName    = %7_ListEntry.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\7_ListEntry.sys
+
+;
+;--- 7_ListEntry_Device Coinstaller installation ------
+;
+
+[7_ListEntry_Device.NT.CoInstallers]
+AddReg=7_ListEntry_Device_CoInstaller_AddReg
+CopyFiles=7_ListEntry_Device_CoInstaller_CopyFiles
+
+[7_ListEntry_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[7_ListEntry_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[7_ListEntry_Device.NT.Wdf]
+KmdfService =  7_ListEntry, 7_ListEntry_wdfsect
+[7_ListEntry_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "7_ListEntry Installation Disk"
+7_ListEntry.DeviceDesc = "7_ListEntry Device"
+7_ListEntry.SVCDESC = "7_ListEntry Service"
